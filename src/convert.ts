@@ -1,4 +1,5 @@
 import { createContext } from "./core/context.js";
+import { transformDirectives } from "./core/directives.js";
 import { normalizeOptions } from "./core/options.js";
 import { collectDefinitions, collectFootnotes, parse } from "./core/parse.js";
 import { htmlRenderer } from "./core/renderers/html.js";
@@ -15,7 +16,7 @@ function rendererFor(format: ConvertOptions["format"]): Renderer {
 export function convert(markdown: string, options: ConvertOptions): TelegramResult {
   const opts = normalizeOptions(options);
   const renderer = rendererFor(options.format);
-  const root = parse(markdown);
+  const root = transformDirectives(parse(markdown));
   const ctx = createContext(renderer, collectDefinitions(root), collectFootnotes(root), opts);
 
   let text = renderFlow(root.children, ctx, "\n\n");

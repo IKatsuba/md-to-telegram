@@ -1,49 +1,36 @@
 import { describe, expect, it } from "vitest";
-import {
-  buildTelegramPrompt,
-  telegramHtmlPrompt,
-  telegramMarkdownV2Prompt,
-} from "../../src/index.js";
-import { MARKDOWNV2_RESERVED } from "../../src/core/escape.js";
+import { buildTelegramPrompt } from "../../src/index.js";
 
 describe("prompt generation", () => {
   it("builds a system-style prompt by default", () => {
-    expect(telegramHtmlPrompt()).toMatch(/^You are formatting a message for Telegram/);
+    expect(buildTelegramPrompt()).toMatch(/^You are writing a message/);
   });
 
   it("builds an instruction-style prompt on request", () => {
-    expect(telegramHtmlPrompt({ style: "instruction" })).toMatch(/^When you write the message/);
+    expect(buildTelegramPrompt({ style: "instruction" })).toMatch(/^Write the message/);
   });
 
-  it("MarkdownV2 prompt mentions every reserved character", () => {
-    const p = buildTelegramPrompt({ format: "markdownv2" });
-    for (const ch of MARKDOWNV2_RESERVED) {
-      expect(p).toContain(ch);
-    }
+  it("tells the model to write standard Markdown", () => {
+    expect(buildTelegramPrompt()).toMatch(/standard Markdown/i);
   });
 
-  it("MarkdownV2 prompt warns about the __ underline trap", () => {
-    expect(buildTelegramPrompt({ format: "markdownv2" })).toMatch(/UNDERLINE/);
+  it("documents the Telegram-only directives", () => {
+    const p = buildTelegramPrompt();
+    expect(p).toContain("||"); // spoiler
+    expect(p).toContain("++"); // underline
+    expect(p).toContain("[!expandable]"); // expandable quote
   });
 
-  it("HTML prompt names the four allowed named entities", () => {
-    const p = buildTelegramPrompt({ format: "html" });
-    for (const ent of ["&lt;", "&gt;", "&amp;", "&quot;"]) {
-      expect(p).toContain(ent);
-    }
+  it("lists the forbidden constructs", () => {
+    const p = buildTelegramPrompt();
+    expect(p).toMatch(/image/i);
+    expect(p).toMatch(/math/i);
+    expect(p).toMatch(/footnote/i);
+    expect(p).toMatch(/HTML/i);
   });
 
-  it("both prompts list the unsupported constructs", () => {
-    for (const format of ["html", "markdownv2"] as const) {
-      const p = buildTelegramPrompt({ format });
-      expect(p).toMatch(/image/i);
-      expect(p).toMatch(/math/i);
-      expect(p).toMatch(/footnote/i);
-    }
-  });
-
-  it("omits examples when includeExamples is false", () => {
-    expect(telegramMarkdownV2Prompt({ includeExamples: false })).not.toMatch(/Example/);
-    expect(telegramMarkdownV2Prompt({ includeExamples: true })).toMatch(/Example/);
+  it("toggles the worked example", () => {
+    expect(buildTelegramPrompt({ includeExamples: true })).toMatch(/Example/);
+    expect(buildTelegramPrompt({ includeExamples: false })).not.toMatch(/Example/);
   });
 });

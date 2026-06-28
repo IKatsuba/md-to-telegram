@@ -15,8 +15,14 @@ export const markdownV2Renderer: Renderer = {
   italic(inner: string): string {
     return `_${inner}_`;
   },
+  underline(inner: string): string {
+    return `__${inner}__`;
+  },
   strike(inner: string): string {
     return `~${inner}~`;
+  },
+  spoiler(inner: string): string {
+    return `||${inner}||`;
   },
   inlineCode(value: string): string {
     return `\`${escapeMarkdownV2(value, "code")}\``;

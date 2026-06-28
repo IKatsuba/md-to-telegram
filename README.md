@@ -7,7 +7,8 @@ equivalent**.
 - ✅ Targets both Telegram **HTML** and **MarkdownV2** (`parse_mode`).
 - ✅ Fully typed API; the result tells you exactly what was dropped (images, math,
   footnotes, unsupported HTML) and where.
-- ✅ Generates an **LLM prompt** so a model emits Telegram-native markup directly.
+- ✅ Generates an **LLM prompt** so a model writes convert-friendly Markdown.
+- ✅ Understands Telegram-only directives (spoiler, underline, expandable quote).
 - ✅ Dual ESM + CJS, no peer setup.
 
 The conversion rules come straight from the specs in [`docs/`](./docs):
@@ -68,17 +69,34 @@ for (const item of removed) {
 }
 ```
 
-### Generate a prompt for an LLM
+### Recommended pipeline: LLM → Markdown → convert
 
-Make a model produce Telegram-native markup in the first place, so there is nothing to
-strip later:
+The most reliable setup is to let the model write **plain Markdown** and convert it
+deterministically — no post-processing or "sanitizing" of model output needed.
+`buildTelegramPrompt()` produces a single, format-agnostic system prompt that keeps the
+model away from unconvertible constructs and teaches it the Telegram-only directives:
 
 ```ts
-import { telegramHtmlPrompt, telegramMarkdownV2Prompt } from "md-to-telegram";
+import { buildTelegramPrompt, toTelegramHTML } from "md-to-telegram";
 
-const system = telegramHtmlPrompt(); // rules + escaping + supported/unsupported list
-// pass as a system prompt to your model
+const system = buildTelegramPrompt(); // "write Markdown, avoid images/math/...; you may use ||spoiler||, ..."
+const markdown = await llm({ system, prompt: userTask });
+
+const { text } = toTelegramHTML(markdown); // always valid Telegram HTML
+await bot.sendMessage(chatId, text, { parse_mode: "HTML" });
 ```
+
+### Telegram-only directives
+
+Standard Markdown can't express some Telegram entities, so this library understands a
+few small extensions (also documented in the generated prompt). They work in **both**
+output formats:
+
+| Directive | Markdown syntax | HTML | MarkdownV2 |
+|---|---|---|---|
+| Spoiler | `\|\|text\|\|` | `<tg-spoiler>` | `\|\|text\|\|` |
+| Underline | `++text++` | `<u>` | `__text__` |
+| Expandable quote | a blockquote starting with a `> [!expandable]` line | `<blockquote expandable>` | `**>…\|\|` |
 
 ## What maps to what
 

@@ -13,8 +13,14 @@ export const htmlRenderer: Renderer = {
   italic(inner: string): string {
     return `<i>${inner}</i>`;
   },
+  underline(inner: string): string {
+    return `<u>${inner}</u>`;
+  },
   strike(inner: string): string {
     return `<s>${inner}</s>`;
+  },
+  spoiler(inner: string): string {
+    return `<tg-spoiler>${inner}</tg-spoiler>`;
   },
   inlineCode(value: string): string {
     return `<code>${escapeHtml(value, "code")}</code>`;

@@ -16,7 +16,9 @@ export interface Renderer {
   text(value: string, kind?: EscapeKind): string;
   bold(inner: string): string;
   italic(inner: string): string;
+  underline(inner: string): string;
   strike(inner: string): string;
+  spoiler(inner: string): string;
   /** Inline fixed-width code (raw value escaped per code-context). */
   inlineCode(value: string): string;
   /** Inline link; `inner` is rendered link text, `url` raw. */

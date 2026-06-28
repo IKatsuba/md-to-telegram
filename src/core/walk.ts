@@ -1,4 +1,5 @@
 import type {
+  Blockquote,
   FootnoteReference,
   Html,
   List,
@@ -54,8 +55,12 @@ export function renderNode(node: RootContent, ctx: RenderContext): string {
       return r.bold(renderInline(node.children, ctx));
     case "emphasis":
       return r.italic(renderInline(node.children, ctx));
+    case "underline":
+      return r.underline(renderInline(node.children, ctx));
     case "delete":
       return r.strike(renderInline(node.children, ctx));
+    case "spoiler":
+      return r.spoiler(renderInline(node.children, ctx));
     case "inlineCode":
       return r.inlineCode(node.value);
     case "break":
@@ -69,9 +74,10 @@ export function renderNode(node: RootContent, ctx: RenderContext): string {
     case "thematicBreak":
       return ctx.options.thematicBreak;
     case "blockquote": {
+      const expandable = stripExpandableMarker(node);
       const inner = renderFlow(node.children, enterBlockquote(ctx), "\n");
       if (ctx.blockquoteDepth > 0 && ctx.options.flattenBlockquotes) return inner;
-      return r.blockquote(inner, false);
+      return r.blockquote(inner, expandable);
     }
     case "list":
       return renderList(node, ctx);
@@ -123,6 +129,25 @@ export function renderNode(node: RootContent, ctx: RenderContext): string {
     default:
       return "";
   }
+}
+
+/* ------------------------------ blockquotes ------------------------------- */
+
+const EXPANDABLE_MARKER = /^\[!expandable\][^\S\n]*\n?/i;
+
+/**
+ * Detect and remove a leading `[!expandable]` marker (GitHub-alert style) from a
+ * blockquote's first line. Returns whether the quote should be expandable.
+ */
+function stripExpandableMarker(node: Blockquote): boolean {
+  const firstBlock = node.children[0];
+  if (firstBlock?.type !== "paragraph") return false;
+  const firstInline = firstBlock.children[0];
+  if (firstInline?.type !== "text") return false;
+  const stripped = firstInline.value.replace(EXPANDABLE_MARKER, "");
+  if (stripped === firstInline.value) return false;
+  firstInline.value = stripped;
+  return true;
 }
 
 /* --------------------------------- lists ---------------------------------- */

@@ -1,9 +1,5 @@
 export { convert, toTelegramHTML, toTelegramMarkdownV2 } from "./convert.js";
-export {
-  buildTelegramPrompt,
-  telegramHtmlPrompt,
-  telegramMarkdownV2Prompt,
-} from "./prompt/index.js";
+export { buildTelegramPrompt } from "./prompt/index.js";
 
 export type {
   TelegramFormat,

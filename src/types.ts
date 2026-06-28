@@ -124,9 +124,8 @@ export type PromptStyle = "system" | "instruction";
 
 /** Options for {@link buildTelegramPrompt}. */
 export interface PromptOptions {
-  format: TelegramFormat;
   /** Frame the prompt as a system message vs an inline instruction. Default `"system"`. */
   style?: PromptStyle;
-  /** Include worked before/after examples. Default `true`. */
+  /** Include a worked example. Default `true`. */
   includeExamples?: boolean;
 }
