@@ -120,13 +120,9 @@ export function renderNode(node: RootContent, ctx: RenderContext): string {
       return renderTable(ctx, node);
     case "html":
       return renderHtml(ctx, node, "block");
-    case "definition":
-    case "yaml":
-    case "listItem":
-    case "tableRow":
-    case "tableCell":
-      return "";
     default:
+      // definition (resolved into links), yaml, and any node only reachable via a
+      // dedicated renderer (listItem/tableRow/tableCell) produce no output here.
       return "";
   }
 }

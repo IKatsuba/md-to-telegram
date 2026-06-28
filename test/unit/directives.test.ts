@@ -29,6 +29,19 @@ describe("underline directive", () => {
   });
 });
 
+describe("directive flanking edges", () => {
+  it("opens/closes a directive directly adjacent to a node", () => {
+    expect(toTelegramHTML("||**b**||").text).toBe("<tg-spoiler><b>b</b></tg-spoiler>");
+    expect(toTelegramHTML("++**b**++").text).toBe("<u><b>b</b></u>");
+    expect(toTelegramHTML("||`c`||").text).toBe("<tg-spoiler><code>c</code></tg-spoiler>");
+  });
+
+  it("leaves consecutive and trailing markers literal", () => {
+    expect(toTelegramHTML("||||").text).toBe("||||");
+    expect(toTelegramHTML("a||").text).toBe("a||");
+  });
+});
+
 describe("nested directives", () => {
   it("nests underline inside spoiler", () => {
     expect(toTelegramHTML("||a ++u++ b||").text).toBe("<tg-spoiler>a <u>u</u> b</tg-spoiler>");

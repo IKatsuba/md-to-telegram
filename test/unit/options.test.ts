@@ -19,15 +19,29 @@ describe("options", () => {
     expect(toTelegramHTML("- a\n  - b", { listIndent: 2 }).text).toBe("• a\n  • b");
   });
 
-  it("appends footnotes when footnotes: 'append'", () => {
-    const { text } = toTelegramHTML("a[^1]\n\n[^1]: note", { footnotes: "append" });
-    expect(text).toContain("note");
-    expect(text).toContain("[1]");
+  it("appends footnotes after the body separated by a blank line", () => {
+    expect(toTelegramHTML("a[^1]\n\n[^1]: note", { footnotes: "append" }).text).toBe(
+      "a[1]\n\n[1] note",
+    );
+    expect(toTelegramMarkdownV2("a[^1]\n\n[^1]: note", { footnotes: "append" }).text).toBe(
+      "a\\[1\\]\n\n\\[1\\] note",
+    );
+  });
+
+  it("does not prepend a separator when the body is empty (append)", () => {
+    expect(toTelegramHTML("[^1]: only", { footnotes: "append" }).text).toBe("[1] only");
+  });
+
+  it("joins multiple appended footnotes with newlines", () => {
+    expect(
+      toTelegramHTML("a[^1] b[^2]\n\n[^1]: n1\n\n[^2]: n2", { footnotes: "append" }).text,
+    ).toBe("a[1] b[2]\n\n[1] n1\n[2] n2");
   });
 
   it("inlines footnotes when footnotes: 'inline'", () => {
-    const { text } = toTelegramMarkdownV2("a[^1]\n\n[^1]: note", { footnotes: "inline" });
-    expect(text).toContain("note");
+    expect(toTelegramHTML("a[^1]\n\n[^1]: the note", { footnotes: "inline" }).text).toBe(
+      "a (the note)",
+    );
   });
 
   it("convert() requires an explicit format", () => {

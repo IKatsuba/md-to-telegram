@@ -68,17 +68,19 @@ function applyDelimiter(
     }
   }
 
+  // Text tokens are never empty (empty split segments are dropped above), so a
+  // marker can open/close when its neighbor is a node, or non-whitespace text.
   const canOpen = (k: number): boolean => {
     const next = toks[k + 1];
     if (!next) return false;
     if (next.t === "node") return true;
-    return next.t === "txt" && next.v !== "" && !/^\s/.test(next.v);
+    return next.t === "txt" && !/^\s/.test(next.v);
   };
   const canClose = (k: number): boolean => {
     const prev = toks[k - 1];
     if (!prev) return false;
     if (prev.t === "node") return true;
-    return prev.t === "txt" && prev.v !== "" && !/\s$/.test(prev.v);
+    return prev.t === "txt" && !/\s$/.test(prev.v);
   };
 
   const pair = new Map<number, number>();

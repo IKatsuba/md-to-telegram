@@ -29,4 +29,12 @@ describe("block constructs", () => {
   it("separates top-level blocks with a blank line", () => {
     expect(toTelegramHTML("# H\n\ntext").text).toBe("<b>H</b>\n\ntext");
   });
+
+  it("reports block-level HTML nested inside a list item", () => {
+    const { text, removed } = toTelegramHTML("- item\n\n  <div>x</div>");
+    expect(text).toBe("• item");
+    expect(removed).toEqual([
+      expect.objectContaining({ kind: "html", scope: "block", tagName: "div" }),
+    ]);
+  });
 });
