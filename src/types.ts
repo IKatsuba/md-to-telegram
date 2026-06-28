@@ -5,8 +5,14 @@
  * `.d.ts` stays free of internal AST types.
  */
 
-/** Target Telegram parse mode. */
-export type TelegramFormat = "html" | "markdownv2";
+/**
+ * Conversion target.
+ * - `"html"` / `"markdownv2"` — classic `parse_mode` strings (fallback for clients
+ *   without Rich Messages support).
+ * - `"rich"` — the `markdown` field of `InputRichMessage` (Bot API 10.1 Rich Messages),
+ *   which Telegram renders natively (headings, lists, tables, math, media, footnotes…).
+ */
+export type TelegramFormat = "html" | "markdownv2" | "rich";
 
 /** 1-based line/column source location (mirrors a unist Point, owned by us). */
 export interface SourcePoint {
@@ -117,13 +123,38 @@ export interface TelegramResult {
   readonly removed: readonly RemovedItem[];
 }
 
+/* ------------------------------ Rich limits ------------------------------- */
+
+/** Which Rich Message limit a {@link RichLimitWarning} refers to. */
+export type RichLimitKind = "length" | "blocks" | "nesting" | "media" | "columns";
+
+/** A single Rich Message limit violation reported by `validateRichMarkdown`. */
+export interface RichLimitWarning {
+  readonly kind: RichLimitKind;
+  /** The Telegram-imposed maximum. */
+  readonly limit: number;
+  /** The measured value that exceeded the limit. */
+  readonly actual: number;
+  /** Human-readable description. */
+  readonly message: string;
+}
+
 /* --------------------------------- Prompt --------------------------------- */
 
 /** Whether the generated prompt reads as a system message or an inline instruction. */
 export type PromptStyle = "system" | "instruction";
 
+/**
+ * Which conversion target the prompt is written for.
+ * - `"classic"` — HTML/MarkdownV2: forbids images, math, footnotes (no Telegram entity).
+ * - `"rich"` — Rich Messages: those constructs are allowed (rendered natively).
+ */
+export type PromptTarget = "classic" | "rich";
+
 /** Options for {@link buildTelegramPrompt}. */
 export interface PromptOptions {
+  /** Which target the model should write for. Default `"classic"`. */
+  target?: PromptTarget;
   /** Frame the prompt as a system message vs an inline instruction. Default `"system"`. */
   style?: PromptStyle;
   /** Include a worked example. Default `true`. */

@@ -34,3 +34,23 @@ describe("prompt generation", () => {
     expect(buildTelegramPrompt({ includeExamples: false })).not.toMatch(/Example/);
   });
 });
+
+describe("prompt — rich target", () => {
+  it("does not forbid images/math/footnotes", () => {
+    const p = buildTelegramPrompt({ target: "rich" });
+    expect(p).not.toMatch(/will be removed/);
+    expect(p).toMatch(/images:/i);
+    expect(p).toMatch(/\$E=mc\^2\$/);
+  });
+
+  it("still documents the directives", () => {
+    const p = buildTelegramPrompt({ target: "rich" });
+    expect(p).toContain("||");
+    expect(p).toContain("++");
+    expect(p).toContain("[!expandable]");
+  });
+
+  it("classic target still forbids those constructs", () => {
+    expect(buildTelegramPrompt({ target: "classic" })).toMatch(/will be removed/);
+  });
+});

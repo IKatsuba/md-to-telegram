@@ -1,5 +1,4 @@
 import type {
-  Blockquote,
   FootnoteReference,
   Html,
   List,
@@ -9,6 +8,7 @@ import type {
   Table,
 } from "mdast";
 import { type RenderContext, enterBlockquote, enterLink, enterList } from "./context.js";
+import { stripExpandableMarker } from "./directives.js";
 import { normalizeLanguage } from "./data/languages.js";
 import type { Align } from "./indirect/table.js";
 import { layoutTable } from "./indirect/table.js";
@@ -129,25 +129,6 @@ export function renderNode(node: RootContent, ctx: RenderContext): string {
     default:
       return "";
   }
-}
-
-/* ------------------------------ blockquotes ------------------------------- */
-
-const EXPANDABLE_MARKER = /^\[!expandable\][^\S\n]*\n?/i;
-
-/**
- * Detect and remove a leading `[!expandable]` marker (GitHub-alert style) from a
- * blockquote's first line. Returns whether the quote should be expandable.
- */
-function stripExpandableMarker(node: Blockquote): boolean {
-  const firstBlock = node.children[0];
-  if (firstBlock?.type !== "paragraph") return false;
-  const firstInline = firstBlock.children[0];
-  if (firstInline?.type !== "text") return false;
-  const stripped = firstInline.value.replace(EXPANDABLE_MARKER, "");
-  if (stripped === firstInline.value) return false;
-  firstInline.value = stripped;
-  return true;
 }
 
 /* --------------------------------- lists ---------------------------------- */

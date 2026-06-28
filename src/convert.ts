@@ -5,17 +5,23 @@ import { collectDefinitions, collectFootnotes, parse } from "./core/parse.js";
 import { htmlRenderer } from "./core/renderers/html.js";
 import { markdownV2Renderer } from "./core/renderers/markdownv2.js";
 import type { Renderer } from "./core/renderers/renderer.js";
+import { serializeRich } from "./core/rich/serialize.js";
 import { renderFlow } from "./core/walk.js";
 import type { ConvertOptions, FormatOptions, TelegramResult } from "./types.js";
 
-function rendererFor(format: ConvertOptions["format"]): Renderer {
-  return format === "html" ? htmlRenderer : markdownV2Renderer;
-}
-
 /** Convert Markdown to a Telegram-renderable string in the requested format. */
 export function convert(markdown: string, options: ConvertOptions): TelegramResult {
+  if (options.format === "rich") {
+    const root = transformDirectives(parse(markdown));
+    return {
+      text: serializeRich(root, collectDefinitions(root)),
+      format: "rich",
+      removed: [],
+    };
+  }
+
   const opts = normalizeOptions(options);
-  const renderer = rendererFor(options.format);
+  const renderer: Renderer = options.format === "html" ? htmlRenderer : markdownV2Renderer;
   const root = transformDirectives(parse(markdown));
   const ctx = createContext(renderer, collectDefinitions(root), collectFootnotes(root), opts);
 
@@ -43,4 +49,14 @@ export function toTelegramHTML(markdown: string, options?: FormatOptions): Teleg
 /** Convert Markdown to Telegram MarkdownV2. */
 export function toTelegramMarkdownV2(markdown: string, options?: FormatOptions): TelegramResult {
   return convert(markdown, { ...options, format: "markdownv2" });
+}
+
+/**
+ * Convert Markdown to Telegram **Rich Markdown** — the string for the `markdown` field of
+ * `InputRichMessage` (Bot API 10.1 Rich Messages). Headings, lists, tables, math, media,
+ * and footnotes are preserved natively, so `removed` is always empty. Validate length and
+ * structural limits separately with `validateRichMarkdown`.
+ */
+export function toTelegramRich(markdown: string, options?: FormatOptions): TelegramResult {
+  return convert(markdown, { ...options, format: "rich" });
 }

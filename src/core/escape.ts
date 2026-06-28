@@ -41,6 +41,33 @@ export function escapeHtml(value: string, kind: EscapeKind = "normal"): string {
   return out;
 }
 
+// Inline-active characters in Rich Markdown that must be backslash-escaped in text.
+const RICH_ACTIVE = new Set<string>(["\\", "`", "*", "_", "[", "]", "~", "|", "$"]);
+
+/**
+ * Escape text for Telegram **Rich Markdown** (the `InputRichMessage.markdown` field).
+ *
+ * Rich Markdown is GFM-compatible and may contain HTML, so we entity-escape `< > &`
+ * (to avoid accidental HTML parsing) and backslash-escape the inline-active Markdown
+ * characters. Line-start block starters (`#`, `-`, `>`…) are not escaped — a documented
+ * limitation; LLM prose rarely starts a line with a literal block marker.
+ */
+export function escapeRich(value: string, kind: EscapeKind = "normal"): string {
+  if (kind === "code") return value; // code spans/blocks are literal (caller widens fences)
+  if (kind === "linkUrl") {
+    return value.replace(/\\/g, "\\\\").replace(/\)/g, "\\)");
+  }
+  let out = "";
+  for (const ch of value) {
+    if (ch === "&") out += "&amp;";
+    else if (ch === "<") out += "&lt;";
+    else if (ch === ">") out += "&gt;";
+    else if (RICH_ACTIVE.has(ch)) out += `\\${ch}`;
+    else out += ch;
+  }
+  return out;
+}
+
 /** Escape text for Telegram MarkdownV2 parse mode. */
 export function escapeMarkdownV2(value: string, kind: EscapeKind = "normal"): string {
   let out = "";

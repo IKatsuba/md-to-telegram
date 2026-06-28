@@ -4,7 +4,8 @@ Convert LLM-style Markdown (GFM + LaTeX math) into **Telegram-renderable** outpu
 in both Telegram formats — with a **typed report of everything that had no Telegram
 equivalent**.
 
-- ✅ Targets both Telegram **HTML** and **MarkdownV2** (`parse_mode`).
+- ✅ Targets Telegram **HTML**, **MarkdownV2** (`parse_mode`), and **Rich Markdown**
+  (the `markdown` field of `InputRichMessage`, Bot API 10.1 Rich Messages).
 - ✅ Fully typed API; the result tells you exactly what was dropped (images, math,
   footnotes, unsupported HTML) and where.
 - ✅ Generates an **LLM prompt** so a model writes convert-friendly Markdown.
@@ -46,6 +47,29 @@ toTelegramMarkdownV2(md).text;
 import { convert } from "md-to-telegram";
 convert(md, { format: "markdownv2" });
 ```
+
+### Rich Messages (Bot API 10.1)
+
+For clients that support [Rich Messages](https://core.telegram.org/bots/api#rich-messages),
+Telegram renders headings, lists, tables, math, images, and footnotes **natively** — so
+there's almost nothing to drop. `toTelegramRich` produces the string for the `markdown`
+field of `InputRichMessage`:
+
+```ts
+import { toTelegramRich, validateRichMarkdown } from "md-to-telegram";
+
+const { text, removed } = toTelegramRich(md);
+// removed is always [] — Rich Markdown is GFM-compatible, so it's near pass-through.
+
+// Length / structural limits are checked separately (it never splits for you):
+const warnings = validateRichMarkdown(text); // RichLimitWarning[] (empty if within limits)
+
+await bot.api.sendRichMessage(chatId, { markdown: text });
+```
+
+Use `rich` for capable clients and keep `html` / `markdownv2` as the fallback. When you
+generate the source with an LLM, pass `target: "rich"` to `buildTelegramPrompt` so the
+model is told it may use images, math, tables, and footnotes.
 
 ### Handling what was removed
 

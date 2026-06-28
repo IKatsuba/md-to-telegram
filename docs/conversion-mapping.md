@@ -25,6 +25,30 @@ direct/indirect/none classification is identical across the two.
 > express underline/strikethrough/spoiler/blockquote/etc. and forbids nesting, so it
 > is strictly weaker. Use MarkdownV2.
 
+## Rich Messages target (Bot API 10.1) — the buckets collapse
+
+The tables below describe the **classic** `parse_mode` targets (HTML / MarkdownV2). With
+**Rich Messages** (`sendRichMessage`, the `rich` target via `toTelegramRich`), Telegram
+renders structured content natively, so almost every `indirect`/`none` row becomes
+**direct**:
+
+| Source construct | classic (HTML / MarkdownV2) | rich (`toTelegramRich`) |
+|---|---|---|
+| Heading | indirect → bold | **direct** (`# …`) |
+| Unordered / ordered / task list | indirect | **direct** (native list) |
+| Table | indirect → monospace `<pre>` | **direct** (native `\| … \|`) |
+| Thematic break | indirect | **direct** (`---`) |
+| Image | none (removed) | **direct** (`![alt](url)`, own block) |
+| LaTeX math (inline & block) | none (removed) | **direct** (`$…$`, `$$…$$`) |
+| Footnote | none (removed) | **direct** (`[^id]` + definition) |
+| Spoiler / underline | direct (via directive) | **direct** (`\|\|…\|\|`, `<u>…</u>`) |
+
+Rich Markdown is GFM-compatible, so `toTelegramRich` is essentially a faithful
+re-serialization of the source — `result.removed` is always empty. Structural limits
+(32768 chars, 500 blocks, 16 nesting levels, 50 media, 20 columns) are checked separately
+with `validateRichMarkdown`. Use rich for clients that support it; keep HTML/MarkdownV2 as
+the fallback.
+
 ---
 
 ## Inline constructs

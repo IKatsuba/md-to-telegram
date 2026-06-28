@@ -1,4 +1,4 @@
-import type { Parent, PhrasingContent, Root, Text } from "mdast";
+import type { Blockquote, Parent, PhrasingContent, Root, Text } from "mdast";
 
 /**
  * Telegram-only inline directives that have no standard-Markdown syntax.
@@ -145,4 +145,22 @@ function transformNode(node: Parent): void {
 export function transformDirectives(root: Root): Root {
   transformNode(root);
   return root;
+}
+
+const EXPANDABLE_MARKER = /^\[!expandable\][^\S\n]*\n?/i;
+
+/**
+ * Detect and strip a leading `[!expandable]` marker (GitHub-alert style) from a
+ * blockquote's first line. Mutates the node to remove the marker; returns whether the
+ * quote should be treated as expandable. Shared by the classic walk and the rich serializer.
+ */
+export function stripExpandableMarker(node: Blockquote): boolean {
+  const firstBlock = node.children[0];
+  if (firstBlock?.type !== "paragraph") return false;
+  const firstInline = firstBlock.children[0];
+  if (firstInline?.type !== "text") return false;
+  const stripped = firstInline.value.replace(EXPANDABLE_MARKER, "");
+  if (stripped === firstInline.value) return false;
+  firstInline.value = stripped;
+  return true;
 }

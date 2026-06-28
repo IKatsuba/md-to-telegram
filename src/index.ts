@@ -1,4 +1,5 @@
-export { convert, toTelegramHTML, toTelegramMarkdownV2 } from "./convert.js";
+export { convert, toTelegramHTML, toTelegramMarkdownV2, toTelegramRich } from "./convert.js";
+export { validateRichMarkdown } from "./core/rich/limits.js";
 export { buildTelegramPrompt } from "./prompt/index.js";
 
 export type {
@@ -8,6 +9,9 @@ export type {
   FormatOptions,
   PromptOptions,
   PromptStyle,
+  PromptTarget,
+  RichLimitWarning,
+  RichLimitKind,
   RemovedItem,
   RemovedKind,
   RemovedImage,
