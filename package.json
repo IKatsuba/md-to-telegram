@@ -1,0 +1,88 @@
+{
+  "name": "md-to-telegram",
+  "version": "0.1.0",
+  "description": "Convert LLM-style Markdown into Telegram HTML or MarkdownV2, with a typed report of removed/unsupported constructs.",
+  "keywords": [
+    "telegram",
+    "markdown",
+    "markdownv2",
+    "html",
+    "remark",
+    "mdast",
+    "llm",
+    "bot"
+  ],
+  "license": "MIT",
+  "author": "Igor Katsuba <igor@katsuba.dev>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ikatsuba/md-to-telegram.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ikatsuba/md-to-telegram/issues"
+  },
+  "homepage": "https://github.com/ikatsuba/md-to-telegram#readme",
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "packageManager": "pnpm@10.33.4",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.cts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:cov": "vitest run --coverage",
+    "prepublishOnly": "pnpm build"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "dependencies": {
+    "mdast-util-to-string": "^4.0.0",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
+    "remark-parse": "^11.0.0",
+    "unified": "^11.0.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/mdast": "^4.0.4",
+    "@types/node": "^26.0.1",
+    "@types/unist": "^3.0.3",
+    "@vitest/coverage-v8": "^4.1.9",
+    "eslint": "^10.6.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.9.1",
+    "tsdown": "^0.22.3",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.62.0",
+    "vitest": "^4.1.9"
+  }
+}
