@@ -31,8 +31,10 @@ describe("rich markdown — additional coverage", () => {
     expect(toTelegramRich("- a\n\n  more\n- b").text).toBe("- a\n  more\n- b");
   });
 
-  it("strips the expandable marker (v1: normal quote)", () => {
-    expect(toTelegramRich("> [!expandable]\n> hidden").text).toBe("> hidden");
+  it("renders an expandable quote as a collapsible details block", () => {
+    expect(toTelegramRich("> [!expandable]\n> hidden").text).toBe(
+      "<details><summary>Details</summary>\n\n> hidden\n\n</details>",
+    );
   });
 
   it("renders inline formatting inside headings", () => {

@@ -13,11 +13,10 @@ import type { ConvertOptions, FormatOptions, TelegramResult } from "./types.js";
 export function convert(markdown: string, options: ConvertOptions): TelegramResult {
   if (options.format === "rich") {
     const root = transformDirectives(parse(markdown));
-    return {
-      text: serializeRich(root, collectDefinitions(root)),
-      format: "rich",
-      removed: [],
-    };
+    const text = serializeRich(root, collectDefinitions(root), {
+      expandableSummary: options.expandableSummary ?? "Details",
+    });
+    return { text, format: "rich", removed: [] };
   }
 
   const opts = normalizeOptions(options);

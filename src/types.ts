@@ -104,6 +104,11 @@ export interface FormatOptions {
   collectRemoved?: boolean;
   /** Spaces of indentation per nested-list level. Default `3`. */
   listIndent?: number;
+  /**
+   * `rich` only: the `<summary>` label for an expandable (`[!expandable]`) blockquote,
+   * which is rendered as a collapsible `<details>`. Default `"Details"`.
+   */
+  expandableSummary?: string;
 }
 
 /** Full options for {@link convert} (format required). */
@@ -121,6 +126,16 @@ export interface TelegramResult {
   readonly format: TelegramFormat;
   /** Constructs that had no faithful Telegram analog and were dropped/degraded. */
   readonly removed: readonly RemovedItem[];
+}
+
+/* -------------------------------- Splitting ------------------------------- */
+
+/** Options for {@link splitMessage}. */
+export interface SplitOptions {
+  /** Which format the text was rendered in (selects safe break rules). */
+  format: TelegramFormat;
+  /** Max length per part in UTF-16 code units. Default 4096 (html/markdownv2), 32768 (rich). */
+  maxLength?: number;
 }
 
 /* ------------------------------ Rich limits ------------------------------- */

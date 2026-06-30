@@ -1,5 +1,6 @@
 export { convert, toTelegramHTML, toTelegramMarkdownV2, toTelegramRich } from "./convert.js";
 export { validateRichMarkdown } from "./core/rich/limits.js";
+export { splitMessage } from "./split.js";
 export { buildTelegramPrompt } from "./prompt/index.js";
 
 export type {
@@ -10,6 +11,7 @@ export type {
   PromptOptions,
   PromptStyle,
   PromptTarget,
+  SplitOptions,
   RichLimitWarning,
   RichLimitKind,
   RemovedItem,

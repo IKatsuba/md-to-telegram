@@ -48,3 +48,21 @@ describe("rich serialize — edges", () => {
     );
   });
 });
+
+describe("rich serialize — expandable blockquote", () => {
+  it("renders an expandable quote as a collapsible <details>", () => {
+    expect(rich("> [!expandable]\n> secret\n> two")).toBe(
+      "<details><summary>Details</summary>\n\n> secret\n> two\n\n</details>",
+    );
+  });
+
+  it("uses a custom summary label", () => {
+    expect(toTelegramRich("> [!expandable]\n> x", { expandableSummary: "Spoiler" }).text).toBe(
+      "<details><summary>Spoiler</summary>\n\n> x\n\n</details>",
+    );
+  });
+
+  it("leaves a normal blockquote as a plain quote", () => {
+    expect(rich("> normal")).toBe("> normal");
+  });
+});

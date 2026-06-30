@@ -1,18 +1,25 @@
 import type { List, ListItem, PhrasingContent, Root, RootContent, Table } from "mdast";
 import { stripExpandableMarker } from "../directives.js";
-import { escapeRich } from "../escape.js";
+import { escapeHtml, escapeRich } from "../escape.js";
 import type { DefinitionTarget } from "../parse.js";
+
+export interface RichSerializeOptions {
+  /** `<summary>` label for an expandable (`[!expandable]`) blockquote. */
+  expandableSummary: string;
+}
 
 interface RichCtx {
   definitions: Map<string, DefinitionTarget>;
+  options: RichSerializeOptions;
 }
 
 /** Serialize an mdast tree to Telegram **Rich Markdown** (the `InputRichMessage.markdown`). */
 export function serializeRich(
   root: Root,
   definitions: Map<string, DefinitionTarget>,
+  options: RichSerializeOptions,
 ): string {
-  return serializeFlow(root.children, { definitions });
+  return serializeFlow(root.children, { definitions, options });
 }
 
 /* --------------------------------- blocks --------------------------------- */
@@ -35,12 +42,18 @@ function serializeBlock(node: RootContent, ctx: RichCtx): string {
     case "thematicBreak":
       return "---";
     case "blockquote": {
-      stripExpandableMarker(node); // v1: expandable rendered as a normal quote
+      const expandable = stripExpandableMarker(node);
       const inner = serializeFlow(node.children, ctx);
-      return inner
+      const quoted = inner
         .split("\n")
         .map((line) => (line === "" ? ">" : `> ${line}`))
         .join("\n");
+      if (expandable) {
+        const summary = escapeHtml(ctx.options.expandableSummary);
+        // Markdown is parsed inside <details>, so the inner stays a real (collapsible) quote.
+        return `<details><summary>${summary}</summary>\n\n${quoted}\n\n</details>`;
+      }
+      return quoted;
     }
     case "code":
       return fencedCode(node.value, node.lang ?? "");

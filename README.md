@@ -69,7 +69,38 @@ await bot.api.sendRichMessage(chatId, { markdown: text });
 
 Use `rich` for capable clients and keep `html` / `markdownv2` as the fallback. When you
 generate the source with an LLM, pass `target: "rich"` to `buildTelegramPrompt` so the
-model is told it may use images, math, tables, and footnotes.
+model is told it may use images, math, tables, and footnotes. An expandable blockquote
+(`> [!expandable]`) becomes a collapsible `<details>` (label via the `expandableSummary`
+option).
+
+### Long messages (splitting)
+
+Telegram rejects messages over a length limit (4096 for `parse_mode`, 32768 for Rich).
+`splitMessage` breaks rendered output into parts that fit **without corrupting markup** —
+it packs on block boundaries, re-wraps oversized code blocks, and closes/reopens any open
+tags or inline marks at a seam:
+
+```ts
+import { splitMessage, toTelegramHTML } from "md-to-telegram";
+
+const { text } = toTelegramHTML(longMarkdown);
+for (const part of splitMessage(text, { format: "html" })) {
+  await bot.api.sendMessage(chatId, part, { parse_mode: "HTML" });
+}
+```
+
+Pass `maxLength` to override the per-format default.
+
+### Streaming
+
+Bot API 9.3+ can stream a reply with `sendMessageDraft` (and `sendRichMessageDraft` for
+Rich). `sendMessageDraft` takes `parse_mode`, so stream a **formatted** preview: convert
+the partial buffer each tick (`toTelegramHTML(buffer)`) and send it with `parse_mode`.
+This is safe because `convert` always emits valid markup even from half-written Markdown
+(an unclosed `**bold` stays literal until it closes — no 400s mid-stream). Reuse one
+non-zero `draft_id` so updates animate, then send the final converted message once. See
+[`examples/ai-sdk-grammy.ts`](./examples/ai-sdk-grammy.ts) for the full draft → finalize
+flow with the Vercel AI SDK + grammY.
 
 ### Handling what was removed
 

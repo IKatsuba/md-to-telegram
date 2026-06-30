@@ -113,16 +113,22 @@ dropped, dumped as raw text, or handled outside the message body:
 
 ## Reverse gap: Telegram features unreachable from LLM Markdown
 
-These Telegram entities exist but have **no source construct** in standard LLM
-Markdown, so the converter will normally never produce them:
+Some Telegram-only entities have no standard Markdown syntax. This library adds **inline
+directives** so an LLM can produce them, and the converter understands them:
 
-| Telegram feature | HTML | MarkdownV2 | Why no source |
-|---|---|---|---|
-| Underline | `<u>` | `__text__` | LLM md `__text__` means **bold**, not underline |
-| Spoiler | `<tg-spoiler>` | `\|\|text\|\|` | no Markdown syntax |
-| Expandable blockquote | `<blockquote expandable>` | `**>…\|\|` | no Markdown syntax |
-| Custom emoji | `<tg-emoji>` | `![👍](tg://emoji?id=…)` | no Markdown syntax |
-| Date-time entity | `<tg-time>` | `![…](tg://time?…)` | no Markdown syntax |
+| Telegram feature | Directive (source) | HTML | MarkdownV2 | rich |
+|---|---|---|---|---|
+| Underline | `++text++` | `<u>` | `__text__` | `<u>` |
+| Spoiler | `\|\|text\|\|` | `<tg-spoiler>` | `\|\|text\|\|` | `\|\|text\|\|` |
+| Expandable blockquote | `> [!expandable]` line | `<blockquote expandable>` | `**>…\|\|` | `<details><summary>…</summary>` |
+
+These remain unreachable (need IDs/timestamps an LLM doesn't have), so the converter never
+produces them:
+
+| Telegram feature | HTML | MarkdownV2 |
+|---|---|---|
+| Custom emoji | `<tg-emoji>` | `![👍](tg://emoji?id=…)` |
+| Date-time entity | `<tg-time>` | `![…](tg://time?…)` |
 
 > ⚠️ **Critical ambiguity:** `__x__` is **bold** in CommonMark/GFM but **underline**
 > in Telegram MarkdownV2. When emitting MarkdownV2, source `__bold__` must be
