@@ -1,0 +1,36 @@
+name: Bootstrap publish (one-time)
+
+# ONE-TIME first publish of a brand-new package name. npm cannot use trusted publishing
+# (OIDC) until the package already exists, so this uses a temporary NPM_TOKEN secret.
+# After it succeeds: configure the trusted publisher on npmjs, delete the NPM_TOKEN secret,
+# and remove this workflow. All later releases go through release.yml (OIDC, no token).
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "publish" to confirm the one-time token-based first publish'
+        required: true
+
+permissions:
+  contents: read
+  id-token: write # lets npm attach provenance even for this token-based publish
+
+jobs:
+  bootstrap:
+    if: ${{ inputs.confirm == 'publish' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - run: pnpm install --frozen-lockfile
+      - run: npm install --global npm@latest
+      - run: pnpm build
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
