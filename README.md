@@ -25,7 +25,7 @@ The conversion rules come straight from the specs in [`docs/`](./docs):
 pnpm add md-to-telegram   # or npm i / yarn add
 ```
 
-Requires Node ≥ 20.19.
+Requires Node ≥ 22.18.
 
 ## Usage
 
