@@ -1,5 +1,7 @@
 # md-to-telegram
 
+[![CI](https://github.com/ikatsuba/md-to-telegram/actions/workflows/ci.yml/badge.svg)](https://github.com/ikatsuba/md-to-telegram/actions/workflows/ci.yml)
+
 Convert LLM-style Markdown (GFM + LaTeX math) into **Telegram-renderable** output —
 in both Telegram formats — with a **typed report of everything that had no Telegram
 equivalent**.
@@ -23,7 +25,7 @@ The conversion rules come straight from the specs in [`docs/`](./docs):
 pnpm add md-to-telegram   # or npm i / yarn add
 ```
 
-Requires Node ≥ 20.19.
+Requires Node ≥ 22.18.
 
 ## Usage
 
@@ -184,11 +186,20 @@ All options are optional; defaults match `docs/conversion-mapping.md`.
 | `footnotes` | `"remove"` | `"remove"`, `"inline"`, or `"append"`. |
 | `collectRemoved` | `true` | Populate `result.removed`. |
 | `listIndent` | `3` | Spaces per nested-list level. |
+| `expandableSummary` | `"Details"` | `rich` only: `<summary>` label for `> [!expandable]` quotes. |
 
-## Not (yet) handled
+## Releasing
 
-- **Message length** — Telegram caps a message at 4096 chars; splitting long output is
-  left to the caller for now.
+CI (lint, typecheck, build, tests, mutation) runs on every PR. Releases use
+[Changesets](https://github.com/changesets/changesets) + npm **trusted publishing (OIDC)**:
+
+1. Add a changeset in your PR: `pnpm changeset` (pick the bump, write a summary).
+2. Merging to `main` opens a **"Version Packages"** PR (bumps version + `CHANGELOG.md`).
+3. Merging that PR publishes to npm automatically with provenance — no stored token.
+
+First publish only (npm can't configure OIDC for a name that doesn't exist yet): add a
+temporary `NPM_TOKEN` secret, run the **Bootstrap publish** workflow once, configure the
+trusted publisher in the npm package settings, then delete the secret.
 
 ## License
 
