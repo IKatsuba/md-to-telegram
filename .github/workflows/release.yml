@@ -27,7 +27,9 @@ jobs:
       - run: npm install --global npm@latest
       - uses: changesets/action@v1
         with:
-          version: pnpm version
-          publish: pnpm release
+          # `pnpm run ...` — `pnpm version` would invoke pnpm's built-in version command,
+          # not our "version" script (a `version` script is an npm-version lifecycle hook).
+          version: pnpm run version
+          publish: pnpm run release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
