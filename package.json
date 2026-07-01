@@ -16,12 +16,12 @@
   "author": "Igor Katsuba <igor@katsuba.dev>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ikatsuba/md-to-telegram.git"
+    "url": "git+https://github.com/IKatsuba/md-to-telegram.git"
   },
   "bugs": {
-    "url": "https://github.com/ikatsuba/md-to-telegram/issues"
+    "url": "https://github.com/IKatsuba/md-to-telegram/issues"
   },
-  "homepage": "https://github.com/ikatsuba/md-to-telegram#readme",
+  "homepage": "https://github.com/IKatsuba/md-to-telegram#readme",
   "type": "module",
   "sideEffects": false,
   "engines": {
